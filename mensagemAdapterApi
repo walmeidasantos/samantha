@@ -1,0 +1,77 @@
+from abc import ABC, abstractmethod
+import pathlib
+import textwrap
+import os 
+import dotenv
+import openai
+
+from abc import ABC, abstractmethod
+dotenv.load_dotenv()
+
+class IAAdapter(ABC):
+    @abstractmethod
+    def gerar_texto(self, prompt: str) -> str:
+        pass
+
+class GeminiAdapter(IAAdapter):
+
+    def __init__(self):
+        model='gemini-pro'
+        import google.generativeai as genai
+        GOOGLE_API_KEY=os.getenv("GEMINI_API_KEY")
+        genai.configure(api_key=GOOGLE_API_KEY)
+        self.api = genai.GenerativeModel(model)
+
+    def gerar_texto(self, prompt: str) -> str:
+        resposta = self.api.generate_text(prompt=prompt)
+        return resposta.text
+
+class OpenAIAdaper(IAAdapter):
+
+    def __init__(self):
+        from openai import GPT
+
+        self.gpt = GPT(api_key)
+
+    def gerar_texto(self, prompt: str) -> str:
+        modelo='gpt-3.5-turbo'
+        resposta =  response = openai.chat.completions(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                stream = True,
+                temperature=1,
+                max_tokens=256,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
+                model = modelo)
+        
+        return resposta.choices[0]["text"]
+
+class ComponenteIA:
+    def __init__(self, ia_adapter: IAAdapter):
+        self.ia_adapter = ia_adapter
+
+    def gerar_texto_personalizado(self, prompt: str) -> str:
+        # Processamento adicional para personalizar o texto gerado
+        texto_personalizado = ...
+
+        # Geração de texto usando a API de IA
+        texto_gerado = self.ia_adapter.gerar_texto(prompt + " " + texto_personalizado)
+
+        return texto_gerado
+
+# Exemplo de uso
+API_KEY=os.getenv("GEMINI_API_KEY")
+api_adapter = GeminiAdapter(API_KEY) # Ou OpenAIAdaper(api_key)
+componente_ia = ComponenteIA(api_adapter)
+
+prompt = "Escreva um poema sobre a natureza"
+texto_gerado = componente_ia.gerar_texto_personalizado(prompt)
+
+print(f"\nPrompt: {prompt}")
+print(f"\nTexto Gerado: {texto_gerado}")
