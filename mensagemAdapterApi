@@ -3,7 +3,9 @@ import pathlib
 import textwrap
 import os 
 import dotenv
-import openai
+from IPython.display import display
+from IPython.display import Markdown
+import openai 
 
 from abc import ABC, abstractmethod
 dotenv.load_dotenv()
@@ -21,20 +23,21 @@ class GeminiAdapter(IAAdapter):
         GOOGLE_API_KEY=os.getenv("GEMINI_API_KEY")
         genai.configure(api_key=GOOGLE_API_KEY)
         self.api = genai.GenerativeModel(model)
+        #for i, m in zip(range(5), genai.list_tuned_models()):
+        #    print(m.name)
 
     def gerar_texto(self, prompt: str) -> str:
-        resposta = self.api.generate_text(prompt=prompt)
+        resposta = self.api.generate_content(prompt)
         return resposta.text
 
 class OpenAIAdaper(IAAdapter):
 
     def __init__(self):
-        from openai import GPT
 
-        self.gpt = GPT(api_key)
+        self.modelo = 'gpt-3.5-turbo' 
 
     def gerar_texto(self, prompt: str) -> str:
-        modelo='gpt-3.5-turbo'
+
         resposta =  response = openai.chat.completions(
                 messages=[
                     {
@@ -48,30 +51,37 @@ class OpenAIAdaper(IAAdapter):
                 top_p=1,
                 frequency_penalty=0,
                 presence_penalty=0,
-                model = modelo)
+                model = self.modelo)
         
         return resposta.choices[0]["text"]
 
-class ComponenteIA:
-    def __init__(self, ia_adapter: IAAdapter):
-        self.ia_adapter = ia_adapter
+class IAGenerativa:
+    def __init__(self):
+        self.ia_adapter = GeminiAdapter()
+    
+    def to_markdown(text: str) -> str:
+        text = text.replace('•', '  *')
+        return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
 
     def gerar_texto_personalizado(self, prompt: str) -> str:
-        # Processamento adicional para personalizar o texto gerado
-        texto_personalizado = ...
-
         # Geração de texto usando a API de IA
-        texto_gerado = self.ia_adapter.gerar_texto(prompt + " " + texto_personalizado)
+        texto_gerado = self.ia_adapter.gerar_texto(prompt)
 
         return texto_gerado
 
+
+
 # Exemplo de uso
-API_KEY=os.getenv("GEMINI_API_KEY")
-api_adapter = GeminiAdapter(API_KEY) # Ou OpenAIAdaper(api_key)
-componente_ia = ComponenteIA(api_adapter)
 
-prompt = "Escreva um poema sobre a natureza"
-texto_gerado = componente_ia.gerar_texto_personalizado(prompt)
+IAGenerativa = IAGenerativa() # Ou OpenAIAdaper()
+# componente_ia = IAGenerativa(api_adapter)
 
-print(f"\nPrompt: {prompt}")
-print(f"\nTexto Gerado: {texto_gerado}")
+prompt = "teste"
+texto_gerado = IAGenerativa.gerar_texto_personalizado(prompt)
+
+
+
+
+# print(f"\nPrompt: {prompt}")
+#print(f"\nTexto Gerado: {texto_gerado}")
+    

@@ -4,7 +4,7 @@ class Usuario:
         self.nickname = nickname
         self.senha = senha
 
-usuario1 = Usuario("Laís Urano",  "wsantos", "tg02069")
+usuario1 = Usuario("Wellington",  "wsantos", "tg02069")
 
 
 usuarios = { usuario1.nickname : usuario1}
