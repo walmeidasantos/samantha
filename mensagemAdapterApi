@@ -6,6 +6,7 @@ import dotenv
 from IPython.display import display
 from IPython.display import Markdown
 import openai 
+from load_creds import load_creds
 
 from abc import ABC, abstractmethod
 dotenv.load_dotenv()
@@ -20,11 +21,15 @@ class GeminiAdapter(IAAdapter):
     def __init__(self):
         model='gemini-pro'
         import google.generativeai as genai
-        GOOGLE_API_KEY=os.getenv("GEMINI_API_KEY")
-        genai.configure(api_key=GOOGLE_API_KEY)
+        creds = load_creds()
+        #na credencial simplificada, sem o cloud
+        #GOOGLE_API_KEY=os.getenv("GEMINI_API_KEY")
+        #genai.configure(api_key=GOOGLE_API_KEY)
+        genai.configure(credentials=creds)
         self.api = genai.GenerativeModel(model)
-        #for i, m in zip(range(5), genai.list_tuned_models()):
-        #    print(m.name)
+
+        for i, m in zip(range(5), genai.list_tuned_models()):
+            print(m.name)
 
     def gerar_texto(self, prompt: str) -> str:
         resposta = self.api.generate_content(prompt)
