@@ -1,18 +1,8 @@
-import dotenv
-import os
-import openai
-
-dotenv.load_dotenv()
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from mensagemAdapterApi import IAGenerativa
 
 def resumidor_de_historico(historico):
-    resposta_resumidor = openai.chat.completions.create(
-        model='gpt-3.5-turbo',
-        messages=[
-            {
-            "role": "user",
-            "content": f"""
+
+    messages=f"""
             Resumir progressivamente as linhas de conversa fornecidas, 
             acrescentando ao resumo anterior e retornando um novo resumo. 
             Não apague nenhum assunto da conversa. 
@@ -36,17 +26,9 @@ def resumidor_de_historico(historico):
             {historico}
 
             Novo resumo:"""
-            }
-        ],
-        temperature=1,
-        max_tokens=256,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
+    resposta_resumidor = IAGenerativa.gerar_texto_personalizado(self=IAGenerativa,prompt=messages)
     return resposta_resumidor
 
 def criando_resumo(historico):
-    resposta = resumidor_de_historico(historico=historico)
-    resumo = resposta.choices[0].message.content
+    resumo = resumidor_de_historico(historico=historico)
     return resumo
